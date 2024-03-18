@@ -1,0 +1,11 @@
+target C {
+    tracing: true,
+    timeout: 2 sec
+};
+
+main reactor {
+    timer t(10 msec, 1 msec)
+    reaction(t) {=
+    //
+    =}
+}

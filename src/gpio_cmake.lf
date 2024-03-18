@@ -1,0 +1,21 @@
+target C {
+    cmake-include: "../wiringpi.txt"
+}
+
+preamble {=
+    #include <wiringPi.h> 
+    #define TOGGLE_PIN 16 
+=}
+
+main reactor {
+    reaction(startup) {=
+        printf("Hello world\n");
+        if (wiringPiSetupGpio() == -1) {
+            printf("gpio setup problem");
+        } 
+        pinMode(TOGGLE_PIN, OUTPUT);
+        digitalWrite(TOGGLE_PIN, HIGH);
+        digitalWrite(TOGGLE_PIN, LOW);
+    =}
+}
+

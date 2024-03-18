@@ -1,0 +1,30 @@
+target C {
+    tracing: false,
+    timeout: 2 sec,
+    cmake-include: "../wiringpi.txt"
+};
+
+preamble {=
+    #include <wiringPi.h> 
+    #define TOGGLE_PIN 16 
+=}
+
+main reactor {
+    timer t(10 msec, 1 msec)
+    state flag:int = 0
+    reaction(startup) {=
+        if (wiringPiSetupGpio() == -1) {
+            printf("gpio setup problem");
+        } 
+        pinMode(TOGGLE_PIN, OUTPUT);
+    =}
+    reaction(t) {=
+        if (self->flag) {
+            digitalWrite(TOGGLE_PIN, LOW);
+            self->flag = 0;
+        } else {
+            digitalWrite(TOGGLE_PIN, HIGH);
+            self->flag = 1;
+        }
+    =}
+}

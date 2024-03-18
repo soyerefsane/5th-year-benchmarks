@@ -1,0 +1,86 @@
+target C {
+    tracing: true,
+    timeout: 10 sec
+}
+
+preamble {=
+    #include <stdlib.h>
+    #include <time.h>
+
+    void work_until(instant_t t);
+    int compute_actuator_input(int sensor_data, instant_t until);
+    int sensor_data(instant_t until);
+=}
+
+reactor Sensor(poll_period:time = 0, sense_time:time = 0, randomized:bool = false) {
+    output out:int  
+    // state reaction_time:time = 0 add for randomization later
+    timer t(10 msec, poll_period) //timer can also start at 0?
+    reaction(startup) {=
+        //Seed the random number generator
+        srand(time(NULL));
+    =}
+    reaction(t) -> out {=
+        //logic analyzer toggle -- E2E start time
+        
+        instant_t now = lf_time_physical();
+        //work_until(now + self->sense_time);
+        int measurement =  read_sensor(now + self->sense_time);
+        lf_set(out, measurement);
+    =} 
+}
+
+//add randomization and/or dependency to sensor data
+reactor Process(proc_time:time = 0) {
+    input in:int
+    output out:int
+
+    reaction(in) -> out {=
+        instant_t now = lf_time_physical();
+        //processing data
+        int actuator_data = compute_actuator_input(in->value, now + self->proc_time);
+        lf_set(out, actuator_data);
+    =}
+}
+
+reactor Actuator(poll_interval:time = 0, wait_time:time = 0) {
+    input in:int
+
+    reaction(in) {=
+    //logic analyzer toggle -- jitter on actuator trigger
+    instant_t now = lf_time_physical();
+    work_until(now + self->wait_time);
+    //logic analyzer toggle -- E2E end time
+    =} 
+    // deadline(poll_interval) {=
+    //     lf_print_error_and_exit("Actuator did not meet deadline");
+    // =}  
+}
+
+
+main reactor {
+    preamble {=
+     void work_until(instant_t t) {
+        while (lf_time_physical() < t) {
+            //
+        }
+    }
+
+    int compute_actuator_input(int sensor_data, instant_t until) {
+        sensor_data *= 2;
+        work_until(until);
+        return sensor_data;
+    }
+
+    int read_sensor(instant_t until) {
+        work_until(until);
+        return rand();
+    }
+    =}
+    sensor = new Sensor(poll_period=10 msec, sense_time=1 msec)
+    process = new Process(proc_time=6 msec)
+    actuator = new Actuator(poll_interval=1 msec)
+
+    sensor.out -> process.in 
+    process.out ->actuator.in
+}

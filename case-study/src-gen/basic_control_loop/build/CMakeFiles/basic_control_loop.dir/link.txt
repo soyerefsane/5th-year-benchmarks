@@ -1,0 +1,1 @@
+/usr/bin/gcc-12 -g CMakeFiles/basic_control_loop.dir/lib/schedule.c.o CMakeFiles/basic_control_loop.dir/_basic_control_loop_main.c.o CMakeFiles/basic_control_loop.dir/_sensor.c.o CMakeFiles/basic_control_loop.dir/_process.c.o CMakeFiles/basic_control_loop.dir/_actuator.c.o CMakeFiles/basic_control_loop.dir/basic_control_loop.c.o -o basic_control_loop  -lm core/libcore.a 

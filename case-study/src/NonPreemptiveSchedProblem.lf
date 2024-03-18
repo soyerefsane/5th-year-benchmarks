@@ -1,0 +1,51 @@
+// WARNING 1: the program needs to be compiled with the code in "c-enclaves" branch
+// WARNING 2: the program shall be executed under SCHED_FIFO scheduling policy
+ 
+target C {
+  scheduler: GEDF_NP,
+  timeout: 70ms,
+//  tracing: true
+};
+
+preamble {=
+  #include "platform.h"
+=}
+
+reactor PeriodicTask(duration:time = 2ms, period:time = 1ms, offset:time = 0ms) {
+  timer t(offset, period)
+  
+  output o: int
+  
+  reaction(t) -> o {=
+    printf("%ldms-reactor started\n", self->period / 1000000);
+    instant_t start_time = lf_time_physical_elapsed();
+    while (lf_time_physical_elapsed() - start_time < self->duration) {
+        
+    }
+    printf("%ldms-reactor completed\n", self->period / 1000000);
+  =} deadline (period) {=
+    printf("%ldms-reactor deadline violated\n", self->period / 1000000);
+  =}
+}
+
+main reactor {
+  @enclave
+  reactor_3ms = new PeriodicTask(duration = 10ms, period = 30ms, offset = 10ms)
+  
+  @enclave
+  reactor_6ms_1 = new PeriodicTask(duration = 40ms, period = 60ms)
+  @enclave
+  reactor_6ms_2 = new PeriodicTask(duration = 40ms, period = 60ms)
+  @enclave
+  reactor_6ms_3 = new PeriodicTask(duration = 40ms, period = 60ms)
+  @enclave
+  reactor_6ms_4 = new PeriodicTask(duration = 40ms, period = 60ms)
+  @enclave
+  reactor_6ms_5 = new PeriodicTask(duration = 40ms, period = 60ms)
+  @enclave
+  reactor_6ms_6 = new PeriodicTask(duration = 40ms, period = 60ms)
+  @enclave
+  reactor_6ms_7 = new PeriodicTask(duration = 40ms, period = 60ms)
+  @enclave
+  reactor_6ms_8 = new PeriodicTask(duration = 40ms, period = 60ms)
+}

@@ -1,0 +1,2 @@
+find_library(WIRINGPI_LIBRARIES NAMES wiringPi)
+target_link_libraries(${LF_MAIN_TARGET} PUBLIC ${WIRINGPI_LIBRARIES})

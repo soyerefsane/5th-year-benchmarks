@@ -1,0 +1,50 @@
+target C {
+    tracing: false,
+    timeout: 2 sec,
+    cmake-include: "../wiringpi.txt"
+};
+
+preamble {=
+  #include "platform.h"
+  #include <wiringPi.h> 
+  #define TOGGLE_PIN 16 
+=}
+
+main reactor {
+  timer t(10 msec, 1 msec) 
+  state flag:int = 0
+  reaction(startup) {=
+    lf_thread_t th = lf_thread_self();
+    if (th == 0) {
+      lf_print_error_and_exit("lf_thread_self failed");
+    }
+
+    lf_scheduling_policy_priority_t policy;
+    policy.base.policy = LF_SCHED_PRIORITY;
+    policy.priority = 80;
+    if (lf_thread_set_scheduling_policy(th, (lf_scheduling_policy_t *) &policy) != 0) {
+      lf_print_error_and_exit("lf_thread_set_scheduling_policy failed");
+    }
+
+    if(lf_thread_set_cpu(th, 3) != 0) {
+      lf_print_error_and_exit("lf_thread_set_cpu failed");
+    }
+
+    if(lf_thread_set_priority(th, 75) != 0) {
+      lf_print_error_and_exit("lf_thread_set_priority failed");
+    }  
+    if (wiringPiSetupGpio() == -1) {
+            printf("gpio setup problem");
+        } 
+    pinMode(TOGGLE_PIN, OUTPUT);
+  =}
+   reaction(t) {=
+    if (self->flag) {
+        digitalWrite(TOGGLE_PIN, LOW);
+        self->flag = 0;
+    } else {
+        digitalWrite(TOGGLE_PIN, HIGH);
+        self->flag = 1;
+    }
+  =}
+}

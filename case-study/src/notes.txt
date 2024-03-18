@@ -1,0 +1,9 @@
+- check the original file ever throws deadlines (felt slightly useless to me) DONE
+    - Do I need deadlines? 
+        I think what would be useful would be from the moment of sensor trigger to actuator trigger shouldn't be more than the poll interval but adding a deadline at the actuator level doesn't fix this issue
+- how to generate random time
+- how can I replace volatile val calculation with sth else DONE
+- Look at the LET principle and why adding a logical delay helps DONE
+    - How to decide how much delay to add
+- LF properties that would be interesting to see if there is associated timing behavior:
+    - physical connection? 
